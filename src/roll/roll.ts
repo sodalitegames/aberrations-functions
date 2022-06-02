@@ -97,14 +97,14 @@ export const calcRollData = (results: RollResults): RollData => {
   };
 
   // set experience, crit, and conditions based on the rolls
-  if (sixes >= dice / 2) {
+  if (sixes > dice / 2) {
     successes = dice;
     critical.success = true;
 
     // High risk, high reward - grant an additional experience point - experience++;
   }
 
-  if (ones >= dice / 2) {
+  if (ones > dice / 2) {
     successes = 0;
     critical.fail = true;
 
