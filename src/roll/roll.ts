@@ -1,120 +1,65 @@
-export interface RollData {
-  results: RollResults;
-  successes: number;
-  experience: number;
+export interface RollResults {
+  die: number;
+  total: number;
+  roll: number;
+  bonus: number;
+  advantage: {
+    value: number;
+    calculated: number;
+  };
   critical: {
     success: boolean;
-    fail: boolean;
+    failure: boolean;
   };
 }
 
-export interface RollResults {
-  rolls: number[];
-  removed: number[];
-  dice: number;
-  advantage: number;
-}
+export const roll = (die: number, adv: number): RollResults => {
+  const roll = calculateRoll(die);
 
-export const roll = (dice: number, advantage: number): RollData => {
-  const results = rollDice(dice, advantage);
-  const data = calcRollData(results);
-  return data;
-};
+  const { critical, bonus } = calculateCritical(roll, die);
 
-export const rollOne = (): number => {
-  const roll = Math.floor(Math.random() * 6) + 1;
-  return roll;
-};
+  const advantage = calculateAdvantage(adv);
 
-export const rollDice = (dice: number, advantage: number): RollResults => {
-  let rolls: number[] = [];
-  let removed: number[] = [];
-
-  // create the array of rolls
-  for (let i = 0; i < dice + Math.abs(advantage); i++) {
-    rolls.push(rollOne());
-  }
-
-  if (advantage > 0) {
-    for (let i = 0; i < advantage; i++) {
-      // find the min value
-      const min = Math.min(...rolls);
-
-      // find index of min value
-      const index = rolls.indexOf(min);
-
-      // remove the first instance of the min value from the array
-      rolls.splice(index, 1);
-
-      // add that min value to the advantage rolls array
-      removed.push(min);
-    }
-  }
-
-  if (advantage < 0) {
-    for (let i = 0; i > advantage; i--) {
-      // find the max value
-      const max = Math.max(...rolls);
-
-      // find index of max value
-      const index = rolls.indexOf(max);
-
-      // remove the first instance of the max value from the array
-      rolls.splice(index, 1);
-
-      // add that max value to the advantage rolls array
-      removed.push(max);
-    }
-  }
-
-  return { rolls, removed, dice, advantage };
-};
-
-export const calcRollData = (results: RollResults): RollData => {
-  const { rolls, removed, dice, advantage } = results;
-
-  let successes = 0;
-  let sixes = 0;
-  let ones = 0;
-
-  // set successes, sixes, and ones by looping through the rolls array
-  rolls.forEach(roll => {
-    if (roll > 3) {
-      successes++;
-
-      if (roll === 6) {
-        sixes++;
-      }
-    } else if (roll === 1) {
-      ones++;
-    }
-  });
-
-  let experience = 0;
-  let critical = {
-    success: false,
-    fail: false,
+  return {
+    die,
+    total: roll + advantage.calculated + bonus,
+    roll,
+    bonus,
+    advantage,
+    critical,
   };
+};
 
-  // set experience, crit, and conditions based on the rolls
-  if (sixes > dice / 2) {
-    successes = dice;
-    critical.success = true;
+export const calculateRoll = (die: number): number => {
+  return Math.ceil(Math.random() * die);
+};
 
-    // High risk, high reward - grant an additional experience point - experience++;
+export const calculateAdvantage = (advantage: number): { value: number; calculated: number } => {
+  return {
+    value: advantage,
+    calculated: advantage * 2,
+  };
+};
+
+export const calculateCritical = (roll: number, die: number): { critical: { success: boolean; failure: boolean }; bonus: number } => {
+  let failure = false;
+  let success = false;
+  let bonus = 0;
+
+  if (roll === 1) {
+    failure = true;
   }
 
-  if (ones > dice / 2) {
-    successes = 0;
-    critical.fail = true;
-
-    // High risk, high reward - lose an additional experience point - experience--;
+  if (roll === die) {
+    success = true;
+    bonus = Math.ceil(Math.random() * die);
   }
 
-  if (successes >= dice / 2) {
-    experience++;
-  }
-
-  // save the roll data
-  return { results, successes, experience, critical };
+  return {
+    bonus,
+    critical: {
+      success,
+      failure,
+    },
+  };
 };

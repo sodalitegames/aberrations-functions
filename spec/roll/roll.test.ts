@@ -1,42 +1,42 @@
-import { rollOne, rollDice, calcRollData } from '../../src/roll/roll';
+import { calculateAdvantage, calculateCritical, calculateRoll } from '../../src/roll/roll';
 
 describe('rolling dice', () => {
-  it('should return a number between 1 and 6 when rolling one die', () => {
+  it('should return a number from 1 to the number provided when rolling one die', () => {
     let timesRolled: number;
 
-    for (timesRolled = 0; timesRolled < 50; timesRolled++) {
-      let roll = rollOne();
+    for (timesRolled = 1; timesRolled < 50; timesRolled++) {
+      let roll = calculateRoll(timesRolled);
       expect(roll).toBeGreaterThan(0);
-      expect(roll).toBeLessThan(7);
+      expect(roll).toBeLessThanOrEqual(timesRolled);
     }
 
     expect(timesRolled).toBe(50);
   });
 
-  it('should correctly calculate roll results', () => {
-    const results = rollDice(8, -4);
+  it('should correctly calculate critical results', () => {
+    const success = calculateCritical(12, 12);
+    expect(success.bonus > 0).toBeTruthy();
+    expect(success).toHaveProperty('critical.success', true);
+    expect(success).toHaveProperty('critical.failure', false);
 
-    expect(results).toHaveProperty('dice', 8);
-    expect(results).toHaveProperty('advantage', -4);
+    const failure = calculateCritical(1, 12);
+    expect(failure.bonus === 0).toBeTruthy();
+    expect(failure).toHaveProperty('critical.success', false);
+    expect(failure).toHaveProperty('critical.failure', true);
 
-    expect(results.rolls.length).toBe(8);
-    expect(results.removed.length).toBe(4);
+    const neutral = calculateCritical(6, 12);
+    expect(neutral.bonus === 0).toBeTruthy();
+    expect(neutral).toHaveProperty('critical.success', false);
+    expect(neutral).toHaveProperty('critical.failure', false);
   });
 
-  // Finish this test
-  it('should correctly calculate roll data', () => {
-    const data1 = calcRollData({
-      rolls: [1, 1, 1, 1, 1, 1],
-      removed: [2, 2],
-      dice: 6,
-      advantage: -2,
-    });
+  it('should correctly calculate roll advantage', () => {
+    const positive = calculateAdvantage(4);
+    expect(positive).toHaveProperty('value', 4);
+    expect(positive).toHaveProperty('calculated', 8);
 
-    expect(data1.successes).toBe(0);
-    expect(data1.experience).toBe(0);
-    expect(data1.critical.fail).toBe(true);
-    expect(data1.critical.success).toBe(false);
-
-    // Test more types of roll results
+    const negative = calculateAdvantage(-3);
+    expect(negative).toHaveProperty('value', -3);
+    expect(negative).toHaveProperty('calculated', -6);
   });
 });
