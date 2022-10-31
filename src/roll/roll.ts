@@ -3,6 +3,7 @@ export interface RollResults {
   total: number;
   roll: number;
   bonus: number;
+  modifier: number;
   advantage: {
     value: number;
     calculated: number;
@@ -13,7 +14,7 @@ export interface RollResults {
   };
 }
 
-export const roll = (die: number, adv: number): RollResults => {
+export const roll = (die: number, adv: number, modifier: number): RollResults => {
   const roll = calculateRoll(die);
 
   const { critical, bonus } = calculateCritical(roll, die);
@@ -22,7 +23,8 @@ export const roll = (die: number, adv: number): RollResults => {
 
   return {
     die,
-    total: roll + advantage.calculated + bonus,
+    total: roll + advantage.calculated + bonus + modifier,
+    modifier,
     roll,
     bonus,
     advantage,
