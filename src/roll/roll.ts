@@ -15,6 +15,8 @@ export interface RollResults {
 }
 
 export const roll = (die: number, adv: number, modifier: number): RollResults => {
+  // TODO: Make sure that if a number is not passed as an arguement, the numbers still correctly add together
+
   const roll = calculateRoll(die);
 
   const { critical, bonus } = calculateCritical(roll, die);
@@ -33,7 +35,7 @@ export const roll = (die: number, adv: number, modifier: number): RollResults =>
 };
 
 export const calculateRoll = (die: number): number => {
-  return Math.ceil(Math.random() * die);
+  return Math.floor(Math.random() * die) + 1;
 };
 
 export const calculateAdvantage = (advantage: number): { value: number; calculated: number } => {
@@ -54,7 +56,7 @@ export const calculateCritical = (roll: number, die: number): { critical: { succ
 
   if (roll === die) {
     success = true;
-    bonus = Math.ceil(Math.random() * die);
+    bonus = calculateRoll(die);
   }
 
   return {
