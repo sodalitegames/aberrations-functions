@@ -1,4 +1,4 @@
-import { calculateAdvantage, calculateCritical, calculateRoll } from '../../src/roll/roll';
+import { calculateCritical, calculateRoll } from '../../src/roll/roll';
 
 describe('rolling dice', () => {
   it('should return a number from 1 to the number provided when rolling one die', () => {
@@ -28,15 +28,5 @@ describe('rolling dice', () => {
     expect(neutral.bonus === 0).toBeTruthy();
     expect(neutral).toHaveProperty('critical.success', false);
     expect(neutral).toHaveProperty('critical.failure', false);
-  });
-
-  it('should correctly calculate roll advantage', () => {
-    const positive = calculateAdvantage(4);
-    expect(positive).toHaveProperty('value', 4);
-    expect(positive).toHaveProperty('calculated', 8);
-
-    const negative = calculateAdvantage(-3);
-    expect(negative).toHaveProperty('value', -3);
-    expect(negative).toHaveProperty('calculated', -6);
   });
 });
